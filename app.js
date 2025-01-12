@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 // const mongoConnect = require('./util/database').mongoConnect;
 
 const mongoose = require('mongoose');
-// const User = require('./models/user');
+ const User = require('./models/user');
 
 
 const errorController = require('./controllers/error');
@@ -23,16 +23,16 @@ const shopRoutes = require('./routes/shop');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// app.use((req, res, next) => {
-//   User.findById('67821d970e8baf1c677b4994')
-//     .then(user => {
-//       req.user = new User(user.name,user.email,user.cart,user._id);
-//       next();
-//     })
-//     .catch(err => console.log(err));
+app.use((req, res, next) => {
+  User.findById('67838b926ca5a9d3e4795a9b')
+    .then(user => {
+      req.user = user;
+      next();
+    })
+    .catch(err => console.log(err));
 
 
-//  });
+ });
 
  app.use('/admin', adminRoutes);
 app.use(shopRoutes);
@@ -43,9 +43,21 @@ const password = encodeURIComponent('Survival@360');
 
 
 mongoose.connect(`mongodb+srv://KankanaRc:${password}@cluster0.s0tii.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0`)
-.then(result =>{
+.then(result => {
+  User.findOne().then(user => {
+    if (!user) {
+      const user = new User({
+        name: 'kankana',
+        email: 'kankana.com',
+        cart: {
+          items: []
+        }
+      });
+      user.save();
+    }
+  });
   app.listen(3000);
-}).catch(err =>{
-console.log(err);
+})
+.catch(err => {
+  console.log(err);
 });
-
